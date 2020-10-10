@@ -1,0 +1,79 @@
+#!/bin/bash
+
+set -e
+set -u
+set -o pipefail
+
+exec 3>&1
+exec 1>&2
+
+readonly destination=$1
+
+if [ -z "${destination}" ]; then
+  echo "usage: $0 <path/to/destination>" >&2
+  exit 1
+fi
+
+mkdir -p "${destination}"
+
+echo "Retrieving latest Pipeline Feedback release"
+
+readonly input_file=$(mktemp /tmp/input.XXXXXX)
+
+jq -M -S . < /dev/stdin > "${input_file}"
+
+# Delete trailing `/`, as it can create issues when composing URLs later
+readonly endpoint=$(jq -r .source.endpoint < "${input_file}" | sed "s,/$,,")
+readonly api_token=$(jq -r .source.api_token < "${input_file}")
+
+readonly release_id=$(jq -r .release.id < "${input_file}")
+
+readonly URL_REGEXP='https?://[-A-Za-z0-9\.]+(:[0-9]+)?'
+
+if [ -z "${endpoint}" ]; then
+  echo "Invalid payload: missing 'endpoint'"
+  exit 1
+elif ! [[ "${endpoint}" =~ ${URL_REGEXP} ]]; then 
+  echo "Invalid payload: the value '${endpoint}' for 'endpoint' is not valid; endpoint must match the followinf regex: ${URL_REGEXP}"
+  exit 1
+fi
+
+if [ -z "${api_token}" ]; then
+  echo "Invalid payload: missing 'api_token'"
+  exit 1
+fi
+
+if [ "${release_id}" = 'null' ]; then
+  echo "Invalid payload: missing 'release.id'"
+  exit 1
+fi
+
+echo "Using the API endpoint: ${endpoint}/api/releases"
+
+echo -n "Retrieving release '${release_id}' ... "
+
+if ! release=$(curl --silent --show-error --fail --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases/${release_id}"); then
+  exit 1
+fi
+
+echo 'OK'
+echo "Release '${release_id}':"
+echo "${release}" | jq '.'
+
+readonly release_name=$(echo "${release}" | jq -r '.name')
+readonly release_start=$(echo "${release}" | jq -r '.start')
+readonly release_lastUpdated=$(echo "${release}" | jq -r '.lastUpdated')
+
+echo "${release_id}" > "${destination}/id"
+echo "${release_name}" > "${destination}/name"
+echo "${release_start}" > "${destination}/start"
+echo "${release_lastUpdated}" > "${destination}/lastUpdated"
+
+jq -n "{
+    \"release\":{ \"id\": \"${release_id}\" },
+    \"metadata\": {
+        \"name\": \"${release_name}\",
+        \"start\": ${release_start},
+        \"lastUpdated\": ${release_lastUpdated}
+    }
+}" >&3

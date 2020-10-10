@@ -1,0 +1,73 @@
+#!/bin/bash
+
+set -e
+set -u
+set -o pipefail
+
+exec 3>&1
+exec 1>&2
+
+echo "Retrieving latest Pipeline Feedback release"
+
+readonly input_file=$(mktemp /tmp/input.XXXXXX)
+
+jq -M -S . < /dev/stdin > "${input_file}"
+
+# Delete trailing `/`, as it can create issues when composing URLs later
+readonly endpoint=$(jq -r .source.endpoint < "${input_file}" | sed "s,/$,,")
+readonly api_token=$(jq -r .source.api_token < "${input_file}")
+
+readonly latest_release_id=$(jq -re .release.id < "${input_file}" || echo '')
+
+readonly URL_REGEXP='https?://[-A-Za-z0-9\.]+(:[0-9]+)?'
+
+if [ -z "${endpoint}" ]; then
+    echo "Invalid payload: missing 'endpoint'"
+    exit 1
+elif ! [[ "${endpoint}" =~ ${URL_REGEXP} ]]; then 
+    echo "Invalid payload: the value '${endpoint}' for 'endpoint' is not valid; endpoint must match the followinf regex: ${URL_REGEXP}"
+    exit 1
+fi
+
+if [ -z "${api_token}" ]; then
+    echo "Invalid payload: missing 'api_token'"
+    exit 1
+fi
+
+echo "Using the API endpoint: ${endpoint}/api/releases"
+
+if [ "${latest_release_id}" = null ]; then
+    echo 'No release id provided in input (is it the first time this resource is fetched?); retrieving the latest release'
+
+    curl --silent --show-error --fail --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" \
+        | jq -er '[ sort_by(.start) | reverse | first | select(. != null) | {release: {id: .id}, metadata:{name: .name, start: .start, lastUpdated: .lastUpdated}} ]' >&3
+
+    exit 0;
+fi
+
+echo -n "Looking up start time of the '${latest_release_id}' ... "
+output_file=$(mktemp /tmp/latest_release.XXXXXX)
+
+if status=$(curl --silent --show-error --fail --output "${output_file}" --write-out '%{http_code}' --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases/${latest_release_id}"); then
+    release_start=$(jq -er '.start' < "${output_file}")
+    normalized_release_start="${release_start:0:${#release_start}-3}"
+    start_date="$(date -d @${normalized_release_start} 2>/dev/null || date -r ${normalized_release_start} 2>/dev/null)"
+    echo "${start_date}"
+
+    echo -n "Retrieving all releases at or after ${start_date}"
+
+    curl --silent --show-error --fail --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases?from=${release_start}" \
+        | jq -er '[ sort_by(.start) | reverse[] | {release: {id: .id}, metadata:{name: .name, start: .start, lastUpdated: .lastUpdated}} ]' >&3
+
+    exit 0;
+fi
+
+if [ "${status}" != '404' ]; then
+    exit 1;
+fi
+
+echo 'Release not found'
+echo 'Fetching the latest release instead'
+
+curl --silent --show-error --fail --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" \
+    | jq -er '[ sort_by(.start) | reverse | first | select(. != null) | {release: {id: .id}, metadata:{name: .name, start: .start, lastUpdated: .lastUpdated}} ]' >&3

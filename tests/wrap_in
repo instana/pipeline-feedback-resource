@@ -1,0 +1,24 @@
+#!/bin/bash
+
+readonly input_file=$(mktemp /tmp/input.XXXXXX)
+
+if [ -n "${4}" ]; then
+    echo "{
+        \"source\": {
+            \"endpoint\": \"${1}\",
+            \"api_token\": \"${2}\"
+        },
+        \"release\": {
+            \"id\": \"${4}\"
+        }
+    }" > "${input_file}"
+else
+    echo "{
+        \"source\": {
+            \"endpoint\": \"${1}\",
+            \"api_token\": \"${2}\"
+        }
+    }" > "${input_file}"
+fi
+
+docker run -i instana/pipeline-feedback-resource:latest bash -x /opt/resource/in "${3}" < "${input_file}"
