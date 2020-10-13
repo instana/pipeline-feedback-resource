@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -x
 set -e
 set -u
 set -o pipefail
@@ -9,15 +10,15 @@ exec 1>&2
 
 echo "Retrieving latest Pipeline Feedback release"
 
-readonly input_file=$(mktemp /tmp/input.XXXXXX)
+readonly input_file=$(mktemp input.XXXXXX)
 
-jq -M -S . < /dev/stdin > "${input_file}"
+cat > "${input_file}" <&0
 
 # Delete trailing `/`, as it can create issues when composing URLs later
 readonly endpoint=$(jq -r .source.endpoint < "${input_file}" | sed "s,/$,,")
 readonly api_token=$(jq -r .source.api_token < "${input_file}")
 
-readonly latest_release_id=$(jq -re .release.id < "${input_file}" || echo '')
+readonly latest_release_id=$(jq -re .version.release < "${input_file}" || echo '')
 
 readonly URL_REGEXP='https?://[-A-Za-z0-9\.]+(:[0-9]+)?'
 
@@ -40,13 +41,13 @@ if [ "${latest_release_id}" = null ]; then
     echo 'No release id provided in input (is it the first time this resource is fetched?); retrieving the latest release'
 
     curl --silent --show-error --fail --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" \
-        | jq -er '[ sort_by(.start) | reverse | first | select(. != null) | {release: {id: .id}, metadata:{name: .name, start: .start, lastUpdated: .lastUpdated}} ]' >&3
+        | jq -er '[ sort_by(.start) | reverse | first | select(. != null) | {release: .id} ]' >&3
 
     exit 0;
 fi
 
 echo -n "Looking up start time of the '${latest_release_id}' ... "
-output_file=$(mktemp /tmp/latest_release.XXXXXX)
+output_file=$(mktemp latest_release.XXXXXX)
 
 if status=$(curl --silent --show-error --fail --output "${output_file}" --write-out '%{http_code}' --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases/${latest_release_id}"); then
     release_start=$(jq -er '.start' < "${output_file}")
@@ -57,7 +58,7 @@ if status=$(curl --silent --show-error --fail --output "${output_file}" --write-
     echo -n "Retrieving all releases at or after ${start_date}"
 
     curl --silent --show-error --fail --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases?from=${release_start}" \
-        | jq -er '[ sort_by(.start) | reverse[] | {release: {id: .id}, metadata:{name: .name, start: .start, lastUpdated: .lastUpdated}} ]' >&3
+        | jq -er '[ sort_by(.start) | reverse[] | {release: .id} ]' >&3
 
     exit 0;
 fi
@@ -70,4 +71,4 @@ echo 'Release not found'
 echo 'Fetching the latest release instead'
 
 curl --silent --show-error --fail --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" \
-    | jq -er '[ sort_by(.start) | reverse | first | select(. != null) | {release: {id: .id}, metadata:{name: .name, start: .start, lastUpdated: .lastUpdated}} ]' >&3
+    | jq -er '[ sort_by(.start) | reverse | first | select(. != null) | {release: .id} ]' >&3

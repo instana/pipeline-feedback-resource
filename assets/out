@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -x
 set -e
 set -u
 set -o pipefail
@@ -9,9 +10,9 @@ exec 1>&2
 
 echo "Creating a new Pipeline Feedback release"
 
-readonly input_file=$(mktemp /tmp/input.XXXXXX)
+readonly input_file=$(mktemp input.XXXXXX)
 
-jq -M -S . < /dev/stdin > "${input_file}"
+cat > "${input_file}" <&0
 
 # Delete trailing `/`, as it can create issues when composing URLs later
 readonly endpoint=$(jq -r .source.endpoint < "${input_file}" | sed "s,/$,,")
@@ -63,10 +64,13 @@ fi
 
 echo "Using the API endpoint: ${endpoint}/api/releases"
 
-readonly release=$(curl --silent --show-error --fail -X POST --header 'Content-Type: application/json' --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" -d "{
+if ! release=$(curl --silent --show-error --fail -X POST --header 'Content-Type: application/json' --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" -d "{
     \"name\": \"${release_name}\",
-    \"start\": \"${start}\"
-}")
+    \"start\": ${start}
+}"); then
+    echo 'Cannot create the release'
+    exit 1
+fi
 
 readonly release_id=$(echo "${release}" | jq -r '.id')
 readonly release_name=$(echo "${release}" | jq -r '.name')
@@ -76,10 +80,21 @@ readonly release_lastUpdated=$(echo "${release}" | jq -r '.lastUpdated')
 echo "Created release '${release_name}' with ID '${release_id}'"
 
 jq -n "{
-    \"release\":{ \"id\": \"${release_id}\"},
-    \"metadata\": {
-        \"name\": \"${release_name}\",
-        \"start\": ${release_start},
-        \"lastUpdated\": ${release_lastUpdated}
-    }
+    \"version\": {
+        \"release\": \"${release_id}\"
+    },
+    \"metadata\": [
+        {
+            \"name\": \"name\",
+            \"value\": \"${release_name}\"
+        },
+        {
+            \"name\": \"start\",
+            \"value\": \"${release_start}\"
+        },
+        {
+            \"name\": \"lastUpdated\",
+            \"value\": \"${release_lastUpdated}\"
+        }
+    ]
 }" >&3

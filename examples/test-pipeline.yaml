@@ -1,0 +1,49 @@
+---
+resource_types:
+
+  - name: instana-pipeline-feedback
+    type: docker-image
+    source:
+      repository: instana/pipeline-feedback-resource
+      tag: latest
+
+resources:
+
+  - name: my-release
+    type: instana-pipeline-feedback
+    source:
+      endpoint: https://sesandbox-instana.instana.io
+      api_token: ((instana_api_token))
+
+jobs:
+
+  - name: get-latest-release
+    plan:
+      - get: my-release
+
+  - name: create-new-release
+    plan:
+      - task: prepare-metadata
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: debian
+              tag: buster-slim
+          outputs:
+            - name: release-metadata
+          params:
+            INSTANA_DEBUG: 'true'
+          run:
+            path: /bin/bash
+            args:
+              - -exc
+              - |
+                mkdir -p release-metadata
+                echo 'My test release' > release-metadata/release-name
+      - put: my-release
+        params:
+          INSTANA_DEBUG: 'true'
+
+

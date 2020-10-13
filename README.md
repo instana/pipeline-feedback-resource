@@ -19,6 +19,7 @@ resource_types:
     type: docker-image
     source:
       repository: instana/pipeline-feedback-resource
+      tag: latest
 
 resources:
 
