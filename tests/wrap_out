@@ -1,33 +1,46 @@
-#!/bin/bash
+#!/bin/bash -x
 
 if [ -n "${3}" ]; then
-    release_name_file=$(mktemp /tmp/release_name.XXXXXX)
-    echo "${3}" > "${release_name_file}"
+    scope_file=$(python -c "import os,sys; print(os.path.realpath(\"${3}\"));")
+    echo "Scope file: ${scope_file}"
+else
+    scope_file=$(mktemp /tmp/scope.XXXXXX)
+    echo '{}' > scope_file
+fi
+
+release_name_file=$(mktemp /tmp/release_name.XXXXXX)
+if [ -n "${4}" ]; then
+    echo "${4}" > "${release_name_file}"
+fi
+
+start_file=$(mktemp /tmp/start.XXXXXX)
+if [ -n "${5}" ]; then
+    echo "${5}" > "${start_file}"
 fi
 
 if [ -n "${4}" ]; then
-    start_file=$(mktemp /tmp/start.XXXXXX)
-    echo "${4}" > "${start_file}"
-fi
-
-if [ -n "${release_name_file}" ]; then
-    if [ -n "${start_file}" ]; then
+    if [ -n "${5}" ]; then
         params="{
+            \"scope_file\": \"${scope_file}\",
             \"release_name_file\": \"${release_name_file}\",
             \"start_file\": \"${start_file}\"
         }"
     else
         params="{
+            \"scope_file\": \"${scope_file}\",
             \"release_name_file\": \"${release_name_file}\"
         }"
     fi
 else
-    if [ -n "${start_file}" ]; then
+    if [ -n "${5}" ]; then
         params="{
+            \"scope_file\": \"${scope_file}\",
             \"start_file\": \"${start_file}\"
         }"
     else
-        params="{}"
+        params="{
+            \"scope_file\": \"${scope_file}\"
+        }"
     fi
 fi
 
@@ -41,5 +54,8 @@ echo "{
         --env='BUILD_PIPELINE_NAME=test_pipeline' \
         --env='BUILD_NAME=test_build' \
         --env='BUILD_ID=42' \
+        "--volume=${scope_file}:${scope_file}:ro"\
+        "--volume=${release_name_file}:${release_name_file}:ro"\
+        "--volume=${start_file}:${start_file}:ro"\
         instana/pipeline-feedback-resource:latest \
         bash -x /opt/resource/out

@@ -1,0 +1,10 @@
+{
+    "applications": [
+        {
+            "name": "All Services"
+        },
+        {
+            "name": "Otel Demo"
+        }
+    ]
+}

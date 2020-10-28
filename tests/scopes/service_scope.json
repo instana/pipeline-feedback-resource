@@ -1,0 +1,10 @@
+{
+    "services": [
+        {
+            "name": "spring-webflux"
+        },
+        {
+            "name": "spring-boot"
+        }
+    ]
+}
