@@ -19,6 +19,7 @@ readonly endpoint=$(jq -r .source.endpoint < "${input_file}" | sed "s,/$,,")
 readonly api_token=$(jq -r .source.api_token < "${input_file}")
 readonly release_name_file=$(jq -r .params.release_name_file < "${input_file}")
 readonly start_file=$(jq -r .params.start_file < "${input_file}")
+readonly scope_file=$(jq -r .params.scope_file < "${input_file}")
 
 readonly URL_REGEXP='https?://[-A-Za-z0-9\.]+(:[0-9]+)?'
 
@@ -55,18 +56,41 @@ if [ "${start_file}" != null ]; then
             exit 1
         fi
     else
-        echo "The start timestamp name file '${start_file}' does not exist"
+        echo "The start timestamp file '${start_file}' does not exist"
         exit 1
     fi
 else
     start="$(date +%s)000"
 fi
 
+if [ "${scope_file}" != null ]; then
+    if [ -f "${scope_file}" ]; then
+        if ! JSON_TYPE=$(jq -r type < "${scope_file}"); then
+            echo "The content of the '${scope_file}' scope file is not valid JSON:"
+            echo "${JSON_TYPE}"
+            exit 1
+        fi
+
+        if [ "${JSON_TYPE}" != 'object' ]; then
+            echo "Wrong JSON type contained in the '${scope_file}' scope file; expected 'object', found '${JSON_TYPE}'"
+            exit 1
+        fi
+
+        applications=$(jq -r .applications < "${scope_file}")
+        services=$(jq -r .services < "${scope_file}")
+    else
+        echo "The scope file '${scope_file}' does not exist"
+        exit 1
+    fi
+fi
+
 echo "Using the API endpoint: ${endpoint}/api/releases"
 
 if ! release=$(curl --silent --show-error --fail -X POST --header 'Content-Type: application/json' --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" -d "{
     \"name\": \"${release_name}\",
-    \"start\": ${start}
+    \"start\": ${start},
+    \"applications\": ${applications:-null},
+    \"services\": ${services:-null}
 }"); then
     echo 'Cannot create the release'
     exit 1

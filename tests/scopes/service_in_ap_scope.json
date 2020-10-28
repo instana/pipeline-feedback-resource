@@ -1,0 +1,13 @@
+{
+    "services": [
+        {
+            "name": "spring-webflux",
+            "scopedTo": {
+                "applications": [
+                    { "name": "All Services" }
+                ]
+            }
+        },
+        { "name": "spring-boot" }
+    ]
+}
