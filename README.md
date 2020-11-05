@@ -42,11 +42,6 @@ Creating a new release with, as name, then content of the `my/release/name` file
 - put: my-release
   params:
     release_name_file: my/release/name
-    serviceIds:
-    - my_service_1
-    - my_service_2
-    applicationIds:
-    - my_application_one
 ```
 
 Creating a new release with default name, built as `${BUILD_PIPELINE_NAME}/${BUILD_NAME} #${BUILD_ID}` using [Concourse's resource metadata](https://concourse-ci.org/implementing-resource-types.html#resource-metadata):
@@ -125,6 +120,9 @@ Create a new release in Instana.
     ]
   }
   ```
+
+  The JSON snippet above will scope the new release to apply to the entirety of the Application Perspectives `My Awesome App` and `My Even More Awesome App`, to the entirely of the `Cool service #1` service, and to the `Cool service #2` service, but only to what part of `Cool service #2` is included in the `My Cool App` Application Perspective.
+  For moe information on Application Perspectives, Services and the scoping, refer to the [Application Monitoring](https://www.instana.com/docs/application_monitoring) documentation.
 
 ## Support
 

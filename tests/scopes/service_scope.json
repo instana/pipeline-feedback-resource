@@ -1,10 +1,6 @@
 {
     "services": [
-        {
-            "name": "spring-webflux"
-        },
-        {
-            "name": "spring-boot"
-        }
+        { "name": "spring-webflux" },
+        { "name": "spring-boot" }
     ]
 }

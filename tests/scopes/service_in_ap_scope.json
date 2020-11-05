@@ -2,14 +2,12 @@
     "services": [
         {
             "name": "spring-webflux",
-            "scopedToApplication": [
-                {
-                    "name": "All Services"
-                }
-            ]
+            "scopedTo": {
+                "applications": [
+                    { "name": "All Services" }
+                ]
+            }
         },
-        {
-            "name": "spring-boot"
-        }
+        { "name": "spring-boot" }
     ]
 }
