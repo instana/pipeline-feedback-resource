@@ -99,7 +99,7 @@ Create a new release in Instana.
   (Make that Flux capacitor purr!)
 
 * `scope_file`: *Optional.* Path to the file containing the scoping information for the release in terms of Application Perspectives and Services.
-  The file should contain valid JSON object that satisfies `jq type == 'object'`, and it can have as top-level fields `applications` and `services`, which respectively have the same structure as in the [API documentation for creating releases](https://instana.github.io/openapi/#operation/postRelease), e.g.:
+  The file should contain valid JSON object that satisfies `jq type == 'object'`, and it can have as fields `applications` and `services`, which respectively have the same structure as in the [API documentation for creating releases](https://instana.github.io/openapi/#operation/postRelease), e.g.:
 
   ```json
   {
@@ -122,7 +122,7 @@ Create a new release in Instana.
   ```
 
   The JSON snippet above will scope the new release to apply to the entirety of the Application Perspectives `My Awesome App` and `My Even More Awesome App`, to the entirely of the `Cool service #1` service, and to the `Cool service #2` service, but only to what part of `Cool service #2` is included in the `My Cool App` Application Perspective.
-  For moe information on Application Perspectives, Services and the scoping, refer to the [Application Monitoring](https://www.instana.com/docs/application_monitoring) documentation.
+  For more information on Application Perspectives, Services and the scoping, refer to the [Application Monitoring](https://www.instana.com/docs/application_monitoring) documentation.
 
 ## Support
 
