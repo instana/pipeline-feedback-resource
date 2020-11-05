@@ -99,6 +99,7 @@ Create a new release in Instana.
   (Make that Flux capacitor purr!)
 
 * `scope_file`: *Optional.* Path to the file containing the scoping information for the release in terms of Application Perspectives and Services.
+  Release scoping is supported in Instana v190 and above; using release scoping with older versions of Instana will not lead to issues, but the scoping specification will be ignored.
   The file should contain valid JSON object that satisfies `jq type == 'object'`, and it can have as fields `applications` and `services`, which respectively have the same structure as in the [API documentation for creating releases](https://instana.github.io/openapi/#operation/postRelease), e.g.:
 
   ```json
