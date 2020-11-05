@@ -98,7 +98,7 @@ Create a new release in Instana.
   The value in the `start_file` will be interpreted as in milliseconds since the Epoch (see [Timestamps in Instana](#timestamps-in-instana) for the rationale), so beware that, if you forget to add the milliseconds, you will likely create releases starting somewhen in Jan 1970.
   (Make that Flux capacitor purr!)
 
-* `scope_file`: *Otional.* Path to the file containing the scoping information for the release in terms of Application Perspectives and Services.
+* `scope_file`: *Optional.* Path to the file containing the scoping information for the release in terms of Application Perspectives and Services.
   The file should contain valid JSON object that satisfies `jq type == 'object'`, and it can have as top-level fields `applications` and `services`, which respectively have the same structure as in the [API documentation for creating releases](https://instana.github.io/openapi/#operation/postRelease), e.g.:
 
   ```json
