@@ -135,6 +135,10 @@ If you have questions about how to use Concourse resource, please open a [suppor
 The actions of the resource are written in `bash`, `curl` and `jq`, with the goal of being easy to debug in local even from inside a Docker image (hello, [`fly intercept`](https://concourse-ci.org/builds.html#fly-intercept)!).
 The test scripts assumes a local Docker daemon.
 
+## Releasing
+
+The Docker image for the resource is automatically built and pushed to [Docker Hub](https://hub.docker.com/r/instana/pipeline-feedback-resource) when a new [GitHub release](https://github.com/instana/pipeline-feedback-resource/releases) is published (draft releases are not built and pushed to Docker Hub).
+
 ## Contributing
 
 Ah, our kind of person!
