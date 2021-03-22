@@ -86,7 +86,7 @@ fi
 
 echo "Using the API endpoint: ${endpoint}/api/releases"
 
-if ! release=$(curl --silent --show-error --fail -X POST --header 'Content-Type: application/json' --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" -d "{
+if ! release=$(curl --silent --show-error --fail -X POST --header 'Content-Type: application/json' --header "Authorization: apiToken ${api_token}" --header 'User-Agent: Instana/Concourse' "${endpoint}/api/releases" -d "{
     \"name\": \"${release_name}\",
     \"start\": ${start},
     \"applications\": ${applications:-null},
