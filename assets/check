@@ -44,7 +44,7 @@ if [ "${latest_release_id}" = null ]; then
     echo 'No release id provided in input (is it the first time this resource is fetched?); retrieving the latest release'
 
     curl --silent --show-error --fail \
-        --user-agent "instana/pipeline-feedback-resource/v${version}" \
+        --user-agent "instana/pipeline-feedback-resource/${version}" \
         --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" \
         | jq -er '[ sort_by(.start) | reverse | first | select(. != null) | {release: .id} ]' >&3
 
@@ -54,7 +54,7 @@ fi
 echo -n "Looking up start time of the '${latest_release_id}' ... "
 output_file=$(mktemp latest_release.XXXXXX)
 
-if status=$(curl --silent --show-error --fail --output "${output_file}" --write-out '%{http_code}' --user-agent "instana/pipeline-feedback-resource/v${version}" --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases/${latest_release_id}"); then
+if status=$(curl --silent --show-error --fail --output "${output_file}" --write-out '%{http_code}' --user-agent "instana/pipeline-feedback-resource/${version}" --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases/${latest_release_id}"); then
     release_start=$(jq -er '.start' < "${output_file}")
     normalized_release_start="${release_start:0:${#release_start}-3}"
     start_date="$(date -d @${normalized_release_start} 2>/dev/null || date -r ${normalized_release_start} 2>/dev/null)"
@@ -62,7 +62,7 @@ if status=$(curl --silent --show-error --fail --output "${output_file}" --write-
 
     echo -n "Retrieving all releases at or after ${start_date}"
 
-    curl --silent --show-error --fail --user-agent "instana/pipeline-feedback-resource/v${version}" --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases?from=${release_start}" \
+    curl --silent --show-error --fail --user-agent "instana/pipeline-feedback-resource/${version}" --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases?from=${release_start}" \
         | jq -er '[ sort_by(.start) | reverse[] | {release: .id} ]' >&3
 
     exit 0;

@@ -56,7 +56,7 @@ echo "Using the API endpoint: ${endpoint}/api/releases"
 
 echo -n "Retrieving release '${release_id}' ... "
 
-if ! release=$(curl --silent --show-error --fail --user-agent "instana/pipeline-feedback-resource/v${version}" --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases/${release_id}"); then
+if ! release=$(curl --silent --show-error --fail --user-agent "instana/pipeline-feedback-resource/${version}" --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases/${release_id}"); then
   exit 1
 fi
 
