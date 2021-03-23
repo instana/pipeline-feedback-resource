@@ -8,6 +8,9 @@ set -o pipefail
 exec 3>&1
 exec 1>&2
 
+readonly base_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+readonly version="$(cat "${base_dir}/version" 2>/dev/null || echo 'unknown')"
+
 echo "Retrieving latest Pipeline Feedback release"
 
 readonly destination=$1
@@ -53,7 +56,7 @@ echo "Using the API endpoint: ${endpoint}/api/releases"
 
 echo -n "Retrieving release '${release_id}' ... "
 
-if ! release=$(curl --silent --show-error --fail --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases/${release_id}"); then
+if ! release=$(curl --silent --show-error --fail --user-agent "instana/pipeline-feedback-resource/v${version}" --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases/${release_id}"); then
   exit 1
 fi
 
