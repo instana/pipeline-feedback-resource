@@ -75,5 +75,5 @@ fi
 echo 'Release not found'
 echo 'Fetching the latest release instead'
 
-curl --silent --show-error --fail --user-agent "instana/pipeline-feedback-resource/v${version}" --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" \
+curl --silent --show-error --fail --user-agent "instana/pipeline-feedback-resource/${version}" --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" \
     | jq -er '[ sort_by(.start) | reverse | first | select(. != null) | {release: .id} ]' >&3
