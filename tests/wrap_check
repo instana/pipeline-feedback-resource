@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# ${1}    => Endpoint base URL
+# ${2}    => API token
+# ${3}    => Release name (optional)
+# exit    => 0 if successful
+# example => ./tests/wrap_check https://awesome-tenant.instana.io apitoken
+
 readonly input_file=$(mktemp /tmp/input.XXXXXX)
 
 if [ -n "${3}" ]; then

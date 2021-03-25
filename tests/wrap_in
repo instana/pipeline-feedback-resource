@@ -1,6 +1,15 @@
 #!/bin/bash
 
+# ${1}    => Endpoint base URL
+# ${2}    => API token
+# ${3}    => Resource for input
+# ${4}    => Release id
+# exit    => 0 if successful
+# example => ./tests/wrap_in https://awesome-tenant.instana.io apitoken /tmp/$RANDOM release_id_from_check
+
 readonly input_file=$(mktemp /tmp/input.XXXXXX)
+
+echo "Using input file ${input_file}"
 
 if [ -n "${4}" ]; then
     echo "{
@@ -8,8 +17,8 @@ if [ -n "${4}" ]; then
             \"endpoint\": \"${1}\",
             \"api_token\": \"${2}\"
         },
-        \"release\": {
-            \"id\": \"${4}\"
+        \"version\": {
+            \"release\": \"${4}\"
         }
     }" > "${input_file}"
 else

@@ -12,8 +12,8 @@ resources:
   - name: my-release
     type: instana-pipeline-feedback
     source:
-      endpoint: https://sesandbox-instana.instana.io
-      api_token: ((instana_api_token))
+      endpoint: https://awesome-tenant.instana.io
+      api_token: ((api_token))
 
 jobs:
 

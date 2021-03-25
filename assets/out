@@ -8,6 +8,9 @@ set -o pipefail
 exec 3>&1
 exec 1>&2
 
+readonly base_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+readonly version="$(cat "${base_dir}/common/version" 2>/dev/null || echo 'unknown')"
+
 echo "Creating a new Pipeline Feedback release"
 
 readonly input_file=$(mktemp input.XXXXXX)
@@ -86,7 +89,7 @@ fi
 
 echo "Using the API endpoint: ${endpoint}/api/releases"
 
-if ! release=$(curl --silent --show-error --fail -X POST --header 'Content-Type: application/json' --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" -d "{
+if ! release=$(curl --silent --show-error --fail -X POST --header 'Content-Type: application/json' --user-agent "instana/pipeline-feedback-resource/${version}" --header "Authorization: apiToken ${api_token}" "${endpoint}/api/releases" -d "{
     \"name\": \"${release_name}\",
     \"start\": ${start},
     \"applications\": ${applications:-null},

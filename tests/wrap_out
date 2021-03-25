@@ -1,5 +1,13 @@
 #!/bin/bash -x
 
+# ${1}    => Endpoint base URL
+# ${2}    => API token
+# ${3}    => Scope file
+# ${4}    => Release id
+# ${5}    => Start file
+# exit    => 0 if successful
+# example => ./tests/wrap_in https://awesome-tenant.instana.io apitoken
+
 if [ -n "${3}" ]; then
     scope_file=$(python -c "import os,sys; print(os.path.realpath(\"${3}\"));")
     echo "Scope file: ${scope_file}"
