@@ -9,7 +9,7 @@ exec 3>&1
 exec 1>&2
 
 readonly base_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-readonly version="$(cat "${base_dir}/version" 2>/dev/null || echo 'unknown')"
+readonly version="$(cat "${base_dir}/common/version" 2>/dev/null || echo 'unknown')"
 
 echo "Creating a new Pipeline Feedback release"
 
