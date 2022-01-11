@@ -65,5 +65,5 @@ echo "{
         "--volume=${scope_file}:${scope_file}:ro"\
         "--volume=${release_name_file}:${release_name_file}:ro"\
         "--volume=${start_file}:${start_file}:ro"\
-        instana/pipeline-feedback-resource:latest \
+        icr.io/instana/pipeline-feedback-resource:latest \
         bash -x /opt/resource/out

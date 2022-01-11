@@ -30,4 +30,4 @@ else
     }" > "${input_file}"
 fi
 
-docker run -i instana/pipeline-feedback-resource:latest bash -x /opt/resource/in "${3}" < "${input_file}"
+docker run -i icr.io/instana/pipeline-feedback-resource:latest bash -x /opt/resource/in "${3}" < "${input_file}"
