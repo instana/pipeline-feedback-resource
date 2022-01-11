@@ -18,7 +18,7 @@ resource_types:
   - name: instana-pipeline-feedback
     type: docker-image
     source:
-      repository: instana/pipeline-feedback-resource
+      repository: icr.io/instana/pipeline-feedback-resource
       tag: latest
 
 resources:
@@ -137,7 +137,7 @@ The test scripts assumes a local Docker daemon.
 
 ## Releasing
 
-The Docker image for the resource is automatically built and pushed to [Docker Hub](https://hub.docker.com/r/instana/pipeline-feedback-resource) when a new [GitHub release](https://github.com/instana/pipeline-feedback-resource/releases) is published (draft releases are not built and pushed to Docker Hub).
+The Docker image for the resource is automatically built and pushed to IBM Cloud Container Registry. The images are publicly available via `icr.io/instana/pipeline-feedback-resource` when a new [GitHub release](https://github.com/instana/pipeline-feedback-resource/releases) is published (draft releases are not built and pushed to IBM Cloud Container Registry).
 
 ## Contributing
 
