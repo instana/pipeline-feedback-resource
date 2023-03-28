@@ -16,7 +16,7 @@ This [Concourse](https://concourse-ci.org/) resource allows you to easily create
 resource_types:
 
   - name: instana-pipeline-feedback
-    type: docker-image
+    type: registry-image
     source:
       repository: icr.io/instana/pipeline-feedback-resource
       tag: latest
